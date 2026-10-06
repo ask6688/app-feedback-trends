@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+inputs/
+outputs/
+output/
+.playwright-cli/
+.env
+.env.*
+*.bak
+*.backup
+classification.json
+classification_cs.json
+history.json
+preview.json

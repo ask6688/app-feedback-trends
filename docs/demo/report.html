@@ -1,0 +1,1668 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>App Feedback Trends</title>
+<link rel="icon" href="data:,">
+<style>
+
+:root{
+
+  --ink:        oklch(24% 0.026 255);
+  --ink-2:      oklch(43% 0.020 255);
+  --ink-3:      oklch(58% 0.014 255);
+  --ink-4:      oklch(70% 0.012 255);
+  --bg:         oklch(97.6% 0.006 255);
+  --surface:    oklch(99.7% 0.002 255);
+  --surface-2:  oklch(98.8% 0.005 255);
+  --line:       oklch(92%  0.010 255);
+  --line-2:     oklch(95.5% 0.007 255);
+
+  --accent:     oklch(48% 0.140 258);
+  --accent-ink: oklch(38% 0.120 258);
+  --accent-sf:  oklch(95.5% 0.035 258);
+  --neg:        oklch(54% 0.170 25);
+  --pos:        oklch(52% 0.120 158);
+
+  --shadow-1: 0 1px 2px oklch(24% 0.02 255 / .05), 0 2px 6px oklch(24% 0.02 255 / .03);
+  --shadow-2: 0 2px 4px oklch(24% 0.02 255 / .06), 0 10px 28px oklch(24% 0.02 255 / .07);
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+
+  --r-sm:6px; --r:10px;
+  --ease: cubic-bezier(.25,1,.5,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+
+  --z-sticky:200; --z-panel:300; --z-tip:600;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  font-kerning:normal;
+  font-variant-numeric:tabular-nums;
+}
+button,input,select{font:inherit;color:inherit}
+
+.page{max-width:1240px;margin:0 auto;padding:var(--s6) var(--s5) var(--s8)}
+
+.head{margin-bottom:var(--s7);padding-bottom:var(--s3);border-bottom:1px solid var(--line)}
+.head .eyebrow{
+  font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--ink-3);
+  margin-bottom:var(--s3);
+}
+.head h1{
+  margin:0;
+  font-size:clamp(24px,3.2vw,32px);
+  font-weight:650;
+  letter-spacing:-.02em;
+  line-height:1.25;
+}
+
+section{margin-bottom:var(--s7)}
+.sec-head{
+  display:flex;align-items:baseline;gap:var(--s3);
+  margin-bottom:var(--s4);
+}
+.sec-num{font-size:12px;font-weight:650;letter-spacing:.1em;color:var(--accent)}
+.sec-head h2{margin:0;font-size:17px;font-weight:650;letter-spacing:-.005em}
+.sec-head .hint{font-size:12.5px;color:var(--ink-3);margin-left:auto}
+
+.baseline{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--shadow-1);
+}
+.base-cell{padding:var(--s4) var(--s5);border-left:1px solid var(--line-2)}
+.base-cell:first-child{border-left:0}
+.base-cell:nth-child(6){border-left:0}
+.base-cell:nth-child(n+6){border-top:1px solid var(--line-2)}
+.base-cell .v{font-size:21px;font-weight:650;letter-spacing:-.015em;display:block;line-height:1.3}
+
+.base-cell .v .nb{white-space:nowrap}
+.base-cell .k{font-size:12px;color:var(--ink-3);display:block;margin-top:2px}
+.base-cell .flag{
+  display:inline-block;margin-left:6px;padding:0 6px;border-radius:20px;
+  background:oklch(95% .04 80);color:oklch(45% .09 70);
+  font-size:11px;font-weight:600;vertical-align:2px;
+}
+
+.baseline[data-n="4"]{grid-template-columns:repeat(4,1fr)}
+.baseline[data-n="3"]{grid-template-columns:repeat(3,1fr)}
+.baseline[data-n="2"]{grid-template-columns:repeat(2,1fr)}
+
+.baseline-card{
+  margin-bottom:var(--s5);
+}
+.baseline-label{
+  font-size:12.5px;color:var(--ink-3);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-bottom:var(--s2);
+  display:flex;align-items:baseline;gap:var(--s2);
+}
+.baseline-label::after{
+  content:"";flex:1;height:1px;background:var(--line);
+}
+
+.channels{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3)}
+.chan{
+  display:inline-flex;align-items:baseline;gap:7px;
+  padding:6px 13px;background:var(--surface);border:1px solid var(--line);
+  border-radius:20px;font-size:12.5px;color:var(--ink-3);
+}
+.chan b{color:var(--ink);font-weight:650;font-size:13.5px}
+
+.toolbar{
+  position:sticky;top:0;z-index:var(--z-sticky);
+  display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;
+  margin:0 0 var(--s5);
+  padding:var(--s3) 0;
+  background:color-mix(in oklab, var(--bg) 90%, transparent);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+
+.toolbar .hint{font-size:12.5px;color:var(--ink-3);margin-left:auto;text-align:right}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{
+  border:0;background:transparent;color:var(--ink-2);
+  padding:7px 15px;border-radius:6px;cursor:pointer;
+  font-size:13.5px;font-weight:550;min-height:34px;
+  transition:background .12s var(--ease), color .12s var(--ease);
+}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{
+  background:var(--surface);color:var(--ink);font-weight:650;
+  box-shadow:0 1px 2px oklch(24% .02 255 / .08);
+}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4)}
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:var(--s5) var(--s4) var(--s4);
+  cursor:pointer;
+  transition:transform .18s var(--ease-out), box-shadow .18s var(--ease-out), border-color .18s var(--ease);
+}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:color-mix(in oklab,var(--accent) 30%,var(--line))}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.card .name{font-size:13px;font-weight:650;color:var(--ink-2);letter-spacing:.02em}
+.card .big{font-size:31px;font-weight:650;letter-spacing:-.025em;line-height:1.15;margin:var(--s2) 0 var(--s1)}
+.card .bar{height:3px;background:var(--line-2);border-radius:2px;overflow:hidden;margin:var(--s3) 0}
+.card .bar i{display:block;height:100%;background:var(--accent);border-radius:2px;transform-origin:left;animation:grow .5s var(--ease-out) both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.card .rows{display:grid;gap:5px;margin-top:var(--s3);padding-top:var(--s3);border-top:1px solid var(--line-2)}
+.card .row{display:flex;justify-content:space-between;gap:var(--s2);font-size:12.5px;color:var(--ink-3)}
+.card .row b{font-weight:600;color:var(--ink-2)}
+.card .row b.neg{color:var(--neg)}
+
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
+.chart{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--s4) var(--s4) var(--s2);
+  box-shadow:var(--shadow-1);
+  scroll-margin-top:80px;
+}
+.chart-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s2)}
+.chart-title{font-size:14.5px;font-weight:650}
+.legend{display:flex;gap:2px}
+.legend button{
+  display:inline-flex;align-items:center;gap:6px;
+  border:0;background:transparent;color:var(--ink-3);
+  font-size:12px;padding:5px 8px;border-radius:6px;cursor:pointer;
+  opacity:.5;min-height:30px;
+  transition:background .12s var(--ease),color .12s var(--ease),opacity .12s var(--ease);
+}
+.legend button.active{opacity:1;color:var(--ink-2);background:var(--surface-2)}
+.legend button:hover{opacity:1}
+.legend button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.legend .swatch{width:8px;height:8px;border-radius:50%;flex:none}
+.legend .swatch.total{background:var(--accent)}
+.legend .swatch.negative{background:var(--neg)}
+
+.plot{position:relative;touch-action:pan-y}
+.plot svg{display:block;width:100%;height:262px;overflow:visible}
+.grid-line{stroke:var(--line-2);stroke-width:1}
+.axis-txt{fill:var(--ink-4);font-size:10px}
+.axis-txt.y{text-anchor:end}
+.axis-txt.x{text-anchor:middle}
+.line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.line.total{stroke:var(--accent)}
+.line.negative{stroke:var(--neg)}
+.area{fill:var(--accent);opacity:.07}
+.area.negative{fill:var(--neg);opacity:.06}
+.cross{stroke:var(--ink-4);stroke-width:1;stroke-dasharray:3 3;opacity:0;transition:opacity .1s linear}
+.cross.on{opacity:.9}
+.hit{fill:transparent;cursor:crosshair}
+.dot{opacity:0;transition:opacity .12s var(--ease)}
+.dot.on{opacity:1}
+.chart-empty{padding:var(--s6) 0;text-align:center;color:var(--ink-3);font-size:13px}
+
+.chart-note{
+  display:none;margin:0 0 var(--s4);padding:var(--s3) var(--s4);
+  background:var(--surface-2);border:1px solid var(--line);border-left:2px solid var(--ink-4);
+  border-radius:var(--r-sm);font-size:13px;color:var(--ink-2);
+}
+.chart-note.on{display:block}
+
+.tip{
+  position:fixed;z-index:var(--z-tip);pointer-events:none;
+  background:oklch(22% .02 255);color:oklch(97% .005 255);
+  padding:9px 11px;border-radius:8px;font-size:12px;line-height:1.55;
+  box-shadow:0 8px 24px oklch(20% .03 255 / .28);
+  opacity:0;transform:translateY(3px);
+  transition:opacity .12s var(--ease), transform .12s var(--ease);
+  max-width:280px;
+}
+.tip.on{opacity:1;transform:translateY(0)}
+.tip .t-h{font-weight:650;margin-bottom:4px;font-size:12.5px}
+.tip .t-r{display:flex;justify-content:space-between;gap:var(--s5);color:oklch(88% .01 255)}
+.tip .t-r b{font-weight:600;color:#fff}
+.tip .t-sep{height:1px;background:oklch(42% .02 255);margin:5px 0}
+.tip .t-hint{margin-top:6px;padding-top:5px;border-top:1px solid oklch(42% .02 255);color:oklch(78% .01 255);font-size:11px}
+
+.audit{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-1)}
+.filters{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;padding:var(--s4) var(--s5);border-bottom:1px solid var(--line-2)}
+.ctrl{
+  border:1px solid var(--line);background:var(--surface);
+  border-radius:8px;padding:8px 11px;font-size:13.5px;min-height:38px;
+  transition:border-color .12s var(--ease), box-shadow .12s var(--ease);
+}
+.ctrl:hover{border-color:var(--ink-4)}
+.ctrl:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px oklch(48% .14 258 / .12)}
+select.ctrl{
+  padding-right:30px;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 17px, calc(100% - 11px) 17px;
+  background-size:5px 5px, 5px 5px;background-repeat:no-repeat;
+}
+input.ctrl::placeholder{color:var(--ink-4)}
+.search{position:relative;flex:1;min-width:180px}
+.search .ctrl{width:100%}
+.field{position:relative}
+.range-trigger{min-width:224px;display:inline-flex;align-items:center;justify-content:space-between;gap:var(--s3);cursor:pointer}
+.range-trigger:after{
+  content:"";width:6px;height:6px;flex:none;
+  border-right:1.5px solid var(--ink-3);border-bottom:1.5px solid var(--ink-3);
+  transform:translateY(-2px) rotate(45deg);
+}
+
+.range-panel{
+  position:absolute;top:calc(100% + 6px);left:0;width:340px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--s4);box-shadow:var(--shadow-2);z-index:var(--z-panel);
+  display:none;
+}
+.range-panel.open{display:block;animation:pop .18s var(--ease-out) both}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.rf{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--s2);align-items:center}
+.rf span{color:var(--ink-3);font-size:12px}
+.quick{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s3) 0}
+.quick button{
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);
+  border-radius:7px;padding:6px 10px;font-size:12.5px;cursor:pointer;min-height:32px;
+  transition:background .12s var(--ease),border-color .12s var(--ease),color .12s var(--ease);
+}
+.quick button:hover{background:var(--accent-sf);border-color:color-mix(in oklab,var(--accent) 35%,var(--line));color:var(--accent-ink)}
+.quick button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.ract{display:flex;justify-content:flex-end;gap:var(--s2)}
+.btn{
+  padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13.5px;min-height:36px;
+  border:1px solid var(--line);background:var(--surface);
+  transition:background .12s var(--ease),border-color .12s var(--ease);
+}
+.btn:hover{border-color:var(--ink-4)}
+.btn-primary{background:var(--ink);color:oklch(98% .005 255);border-color:var(--ink);font-weight:600}
+.btn-primary:hover{background:oklch(30% .026 255)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.toggle{display:inline-flex;align-items:center;gap:var(--s2);font-size:13px;color:var(--ink-2);cursor:pointer;user-select:none;min-height:38px}
+.toggle input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.count{font-size:12.5px;color:var(--ink-3);margin-left:auto;white-space:nowrap}
+
+.table-wrap{overflow:auto;max-height:600px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  position:sticky;top:0;z-index:1;
+  background:var(--surface-2);text-align:left;font-weight:600;color:var(--ink-2);
+  padding:10px var(--s3);border-bottom:1px solid var(--line);white-space:nowrap;font-size:12.5px;
+}
+td{padding:11px var(--s3);border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2)}
+tbody tr:hover{background:oklch(97% .006 255)}
+.num{white-space:nowrap}
+td.comment{min-width:340px;max-width:600px;line-height:1.6;color:var(--ink)}
+.stars{font-weight:650;color:var(--ink)}
+.stars.neg{color:var(--neg)}
+
+.chk{display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none;font-size:12.5px;color:var(--ink-3);white-space:nowrap;padding:4px 0}
+.chk input{width:16px;height:16px;accent-color:var(--pos);cursor:pointer;margin:0}
+.chk span{min-width:44px}
+.chk.on{color:var(--pos);font-weight:600}
+.chk:hover{color:var(--ink-2)}
+.badge{
+  display:inline-block;padding:1px 7px;border-radius:20px;
+  background:var(--accent-sf);color:var(--accent-ink);
+  font-size:11.5px;margin:1px 2px 1px 0;white-space:nowrap;
+}
+.badge.none{background:var(--surface-2);color:var(--ink-4)}
+.empty{padding:var(--s7) var(--s4);text-align:center;color:var(--ink-3);font-size:13.5px}
+.more{padding:var(--s3) var(--s5);border-top:1px solid var(--line-2);font-size:12.5px;color:var(--ink-3);text-align:center}
+
+.sk{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);height:100%;min-height:150px;position:relative;overflow:hidden}
+.sk:after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,oklch(97% .004 255 / .8),transparent);
+  transform:translateX(-100%);animation:shim 1.4s var(--ease) infinite;
+}
+@keyframes shim{to{transform:translateX(100%)}}
+
+.note-line{display:flex;align-items:center;gap:var(--s3);padding:var(--s4) var(--s5);color:var(--ink-3);font-size:13px}
+.spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+footer{
+  margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--line);
+  font-size:12.5px;color:var(--ink-3);line-height:1.8;max-width:84ch;
+}
+footer b{color:var(--ink-2);font-weight:600}
+
+.reveal{opacity:0;transform:translateY(8px);animation:rise .45s var(--ease-out) both}
+@keyframes rise{to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{animation:none;opacity:1;transform:none}
+  .card .bar i{animation:none}
+  .sk:after{animation:none}
+  .spin{animation-duration:2s}
+}
+
+@media (max-width:1080px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .baseline{grid-template-columns:repeat(3,1fr)}
+
+  .baseline[data-n="4"]{grid-template-columns:repeat(4,1fr)}
+  .baseline[data-n="3"]{grid-template-columns:repeat(3,1fr)}
+  .baseline[data-n="2"]{grid-template-columns:repeat(2,1fr)}
+  .base-cell:nth-child(6){border-left:1px solid var(--line-2)}
+  .base-cell:nth-child(4){border-left:0}
+  .base-cell:nth-child(n+4){border-top:1px solid var(--line-2)}
+}
+@media (max-width:880px){
+  .charts{grid-template-columns:1fr}
+  .page{padding:var(--s5) var(--s4) var(--s7)}
+
+  .baseline[data-n="4"]{grid-template-columns:repeat(4,1fr)}
+  .baseline[data-n="3"]{grid-template-columns:repeat(3,1fr)}
+  .baseline[data-n="2"]{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:720px){
+  body{font-size:14.5px}
+  .cards{grid-template-columns:1fr}
+
+  .baseline,.baseline[data-n="4"]{grid-template-columns:repeat(2,1fr)}
+  .baseline[data-n="3"],.baseline[data-n="2"]{grid-template-columns:1fr}
+  .base-cell{border-left:1px solid var(--line-2);border-top:1px solid var(--line-2);padding:var(--s3) var(--s4)}
+  .base-cell:nth-child(odd){border-left:0}
+  .base-cell:nth-child(-n+2){border-top:0}
+  .base-cell .v{font-size:18px}
+  .finding{grid-template-columns:auto 1fr;gap:var(--s3);padding:var(--s3) var(--s4)}
+  .finding .figure{grid-column:2;font-size:17px}
+  .toolbar{position:static;background:transparent;backdrop-filter:none;padding:0 0 var(--s3);gap:var(--s2)}
+  .seg{width:100%}
+  .seg button{flex:1;padding:9px 8px}
+
+  .toolbar .hint{width:100%;margin-left:0;text-align:left}
+  .sec-head{flex-wrap:wrap;row-gap:var(--s2)}
+  .plot svg{height:210px}
+  .filters{padding:var(--s3) var(--s4)}
+  .search{min-width:100%;order:9}
+  .count{margin-left:0;order:10;width:100%}
+  .range-panel{position:fixed;left:12px;right:12px;top:auto;bottom:12px;width:auto}
+
+  table,thead,tbody,tr,td{display:block;width:100%}
+  thead{display:none}
+  tbody tr{border-bottom:1px solid var(--line);padding:var(--s3) var(--s4)}
+  tbody tr:hover{background:transparent}
+  td{border:0;padding:3px 0;display:grid;grid-template-columns:64px 1fr;gap:var(--s3);align-items:start}
+  td:before{content:attr(data-l);color:var(--ink-4);font-size:12px}
+  td.comment{min-width:0;max-width:none;grid-template-columns:1fr;padding-top:var(--s2)}
+  td.comment:before{display:none}
+  .table-wrap{max-height:none;overflow:visible}
+}
+
+.part{
+  display:flex;align-items:center;flex-wrap:wrap;gap:var(--s2) var(--s4);
+  margin:var(--s6) 0 var(--s6);
+  padding:var(--s4) var(--s5);
+  background:linear-gradient(90deg,var(--accent-sf),transparent 62%);
+  border:1px solid var(--line);
+  border-left:3px solid var(--accent);
+  border-radius:var(--r);
+  box-shadow:var(--shadow-1);
+}
+.part-group:first-of-type .part{margin-top:0}
+.part .part-main{display:flex;align-items:center;gap:var(--s3);min-width:0}
+.part .part-idx{
+  font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--accent-ink);
+  padding:3px 9px;border-radius:20px;
+  background:var(--surface);border:1px solid color-mix(in oklab,var(--accent) 26%,var(--line));
+  white-space:nowrap;
+}
+.part h2{margin:0;font-size:20px;font-weight:650;letter-spacing:-.02em;white-space:nowrap}
+.part .part-desc{font-size:12.5px;color:var(--ink-3);margin-left:auto;text-align:right}
+@media (max-width:720px){
+
+  .part{flex-direction:column;align-items:flex-start;gap:var(--s2)}
+  .part .part-desc{margin-left:0;text-align:left}
+}
+
+.part-group.collapsed > .part-body{display:none!important}
+
+.part{cursor:pointer;user-select:none;transition:box-shadow .16s var(--ease), border-color .16s var(--ease)}
+.part:hover{box-shadow:var(--shadow-2);border-color:color-mix(in oklab,var(--accent) 30%,var(--line))}
+.part:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.part h2::after{
+  content:"";display:inline-block;vertical-align:2px;
+  width:7px;height:7px;margin-left:9px;
+  border-right:1.7px solid var(--ink-4);border-bottom:1.7px solid var(--ink-4);
+  transform:rotate(45deg);
+  transition:transform .2s var(--ease-out), border-color .16s var(--ease);
+}
+.part:hover h2::after{border-color:var(--accent)}
+.part-group.collapsed .part h2::after{transform:rotate(-45deg)}
+
+.note-block{
+  margin:var(--s6) 0 var(--s7);
+  padding:var(--s4) var(--s5);
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+}
+.note-block > .sec-head{margin-bottom:var(--s3)}
+.note-block > .sec-head h2{font-size:14px}
+.note-block > .sec-head .hint{font-size:12px}
+.note-block .note-body{font-size:12.5px;color:var(--ink-3);line-height:1.8;max-width:84ch}
+.note-block .note-body p{margin:0 0 var(--s2)}
+.note-block .note-body p:last-child{margin-bottom:0}
+.note-block .note-body b{color:var(--ink-2);font-weight:600}
+
+.starbox{
+  display:grid;grid-template-columns:minmax(220px,auto) 1fr;gap:var(--s6);align-items:center;
+  padding:var(--s5) var(--s6);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow-1);
+}
+.star-label{font-size:12.5px;color:var(--ink-3);font-weight:600}
+.star-value{font-size:52px;font-weight:700;letter-spacing:-.03em;line-height:1.05;color:var(--neg);font-variant-numeric:tabular-nums}
+.star-sub{font-size:12.5px;color:var(--ink-3);margin-top:5px}
+.star-side{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4)}
+.star-side .k{font-size:12px;color:var(--ink-3);display:block}
+.star-side .v{font-size:19px;font-weight:650;display:block;margin-top:3px;font-variant-numeric:tabular-nums}
+
+.srcgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--s3);margin-top:var(--s4)}
+.srcgrid[data-n="5"]{grid-template-columns:repeat(5,minmax(0,1fr))}
+.srcgrid[data-n="1"]{grid-template-columns:minmax(0,240px)}
+.src-cell{padding:var(--s4);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-1);min-width:0}
+.src-cell .src-name{font-size:13px;font-weight:650;color:var(--ink-2)}
+.src-cell .src-rate{font-size:23px;font-weight:680;letter-spacing:-.02em;display:block;margin-top:7px;font-variant-numeric:tabular-nums}
+.src-cell .src-meta{font-size:11.5px;color:var(--ink-4);margin-top:3px;display:block}
+.src-cell .bar{margin-top:9px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.src-cell .bar i{display:block;height:100%;background:var(--neg);border-radius:2px;transition:width .5s var(--ease-out)}
+
+.stardist{margin-top:var(--s4);padding:var(--s5) var(--s6);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-1)}
+.sd-row{display:grid;grid-template-columns:112px 1fr 132px;gap:var(--s4);align-items:center;padding:5px 0}
+.sd-name{font-size:13px;color:var(--ink-2);font-weight:600;white-space:nowrap}
+.sd-bar{height:8px;background:var(--line-2);border-radius:4px;overflow:hidden}
+.sd-bar i{display:block;height:100%;border-radius:4px;transition:width .5s var(--ease-out)}
+.sd-val{font-size:12.5px;color:var(--ink-3);text-align:right;font-variant-numeric:tabular-nums}
+.sd-mark{
+  display:inline-block;margin-left:6px;padding:0 6px;border-radius:20px;
+  background:var(--surface-2);color:var(--ink-4);font-size:10.5px;font-weight:600;vertical-align:1px;
+  white-space:nowrap;
+}
+
+.dash{color:var(--ink-4);font-size:13px;padding-left:2px}
+
+.legend .lg-static{
+  display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:6px;
+  font-size:12px;color:var(--ink-2);background:var(--surface-2);
+}
+
+@media (max-width:1080px){
+  .srcgrid,.srcgrid[data-n]{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .starbox{grid-template-columns:1fr;gap:var(--s4)}
+  .star-side{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:720px){
+  .srcgrid,.srcgrid[data-n]{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .star-value{font-size:40px}
+  .sd-row{grid-template-columns:56px 1fr 106px;gap:var(--s3)}
+  .sd-val{font-size:11.5px}
+  .sd-mark{display:none}
+  .star-side{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="head">
+    <div class="eyebrow">APP FEEDBACK TRENDS · TOPIC MONITORING</div>
+    <h1>用户反馈长期趋势</h1>
+  </header>
+
+  <div class="part-group" data-part="1">
+  <div class="part">
+    <div class="part-main"><span class="part-idx">PART 01</span><h2>应用市场分析</h2></div>
+    <span class="part-desc">应用商店反馈 · 全量评论</span>
+  </div>
+  <div class="part-body">
+
+  <div class="toolbar">
+    <div class="seg" id="platformSwitch"></div>
+    <div class="seg" id="starPeriodSwitch"></div>
+    <span class="hint" id="starHint"></span>
+  </div>
+
+  <div class="baseline-card">
+    <div class="baseline-label">数据基线</div>
+    <div class="baseline" id="baseline"></div>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>应用市场差评率</h2></div>
+    <div class="starbox" id="starbox"></div>
+    <div class="srcgrid" id="srcgrid"></div>
+    <div class="stardist" id="stardist"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>专题概览</h2><span class="hint">点击卡片查看对应趋势</span></div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2 id="trendTitle">趋势分析</h2></div>
+    <p class="chart-note" id="weekNote"></p>
+    <div class="charts" id="charts"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>评论核验</h2><span class="hint">点击趋势图上的点可定位到该周期</span></div>
+    <div class="audit">
+      <div class="filters">
+        <div class="field">
+          <button class="ctrl range-trigger" id="rangeTrigger" aria-label="选择核验日期范围" aria-expanded="false"></button>
+          <div class="range-panel" id="rangePanel">
+            <div class="rf">
+              <input type="date" class="ctrl" id="rangeStart" aria-label="开始日期">
+              <span>至</span>
+              <input type="date" class="ctrl" id="rangeEnd" aria-label="结束日期">
+            </div>
+            <div class="quick">
+              <button data-range="week">近一周</button>
+              <button data-range="month">近 30 天</button>
+              <button data-range="three">近三个月</button>
+              <button data-range="dashboard">看板范围</button>
+              <button data-range="all">全部数据</button>
+            </div>
+            <div class="ract">
+              <button class="btn" id="rangeCancel">取消</button>
+              <button class="btn btn-primary" id="rangeApply">应用</button>
+            </div>
+          </div>
+        </div>
+        <select class="ctrl" id="detailPlatform" aria-label="选择平台口径"></select>
+        <select class="ctrl" id="detailTopic" aria-label="选择专题"></select>
+        <select class="ctrl" id="solvedFilter" aria-label="按解决状态筛选">
+          <option value="all">全部状态</option>
+          <option value="unsolved">未解决</option>
+          <option value="solved">已解决</option>
+        </select>
+        <div class="search"><input class="ctrl" id="detailSearch" placeholder="搜索评论原文关键词" aria-label="搜索评论原文"></div>
+        <label class="toggle"><input type="checkbox" id="onlyNeg">仅看差评</label>
+        <button class="btn" id="exportBtn" title="导出当前筛选结果为 CSV">导出 CSV</button>
+        <span class="count" id="detailCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="num">ID</th><th>日期</th><th>平台</th><th>渠道</th>
+            <th class="num">星级</th><th>专题</th><th>评论原文</th><th>是否解决</th>
+          </tr></thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+      <div class="note-line" id="detailState"><span class="spin"></span>正在加载评论明细…</div>
+    </div>
+  </section>
+
+  <div class="note-block">
+    <div class="sec-head"><h2>口径说明</h2><span class="hint">应用市场分析</span></div>
+    <div class="note-body">
+      <p><b>应用市场差评率　</b>全量评论中一至三星的占比（应用市场来源由输入数据确定）；反馈率 = 命中该专题的评论数 ÷ 同期全量评论数；双端汇总采用分子与分母分别相加计算，不做简单平均。</p>
+      <p><b>处理口径　</b>一至三星为需处理反馈；四星、五星与无星级保留记录但不作为待处理，「是否解决」统一记为「-」，也不参与「已解决 / 未解决」筛选与统计。</p>
+    </div>
+  </div>
+  </div>
+  </div>
+
+  <div class="part-group" data-part="2">
+  <div class="part">
+    <div class="part-main"><span class="part-idx">PART 02</span><h2>客服客诉分析</h2></div>
+    <span class="part-desc">无星级评分</span>
+  </div>
+  <div class="part-body">
+
+  <div class="toolbar">
+    <div class="seg" id="csPeriodSwitch"></div>
+    <span class="hint" id="csHint"></span>
+  </div>
+
+  <div class="baseline-card">
+    <div class="baseline-label">数据基线</div>
+    <div class="baseline" id="csBaseline"></div>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>专题概览</h2><span class="hint">点击卡片查看对应趋势</span></div>
+    <div class="cards" id="csCards"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2 id="csTrendTitle">趋势分析</h2></div>
+    <p class="chart-note" id="csNote"></p>
+    <div class="charts" id="csCharts"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>客服反馈核验</h2><span class="hint">点击趋势图上的点可定位到该批次</span></div>
+    <div class="audit">
+      <div class="filters">
+        <div class="field">
+          <button class="ctrl range-trigger" id="csRangeTrigger" aria-label="选择核验日期范围" aria-expanded="false"></button>
+          <div class="range-panel" id="csRangePanel">
+            <div class="rf">
+              <input type="date" class="ctrl" id="csRangeStart" aria-label="开始日期">
+              <span>至</span>
+              <input type="date" class="ctrl" id="csRangeEnd" aria-label="结束日期">
+            </div>
+            <div class="quick">
+              <button data-cs-range="week">近一周</button>
+              <button data-cs-range="month">近 30 天</button>
+              <button data-cs-range="three">近三个月</button>
+              <button data-cs-range="dashboard">看板范围</button>
+              <button data-cs-range="all">全部数据</button>
+            </div>
+            <div class="ract">
+              <button class="btn" id="csRangeCancel">取消</button>
+              <button class="btn btn-primary" id="csRangeApply">应用</button>
+            </div>
+          </div>
+        </div>
+        <select class="ctrl" id="csModule" aria-label="选择模块"></select>
+        <select class="ctrl" id="csSolvedFilter" aria-label="按解决状态筛选">
+          <option value="all">全部状态</option>
+          <option value="unsolved">未解决</option>
+          <option value="solved">已解决</option>
+        </select>
+        <div class="search"><input class="ctrl" id="csSearch" placeholder="搜索用户反馈原文关键词" aria-label="搜索用户反馈原文"></div>
+        <button class="btn" id="csExportBtn" title="导出当前筛选结果为 CSV">导出 CSV</button>
+        <span class="count" id="csCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="num">ID</th><th>周期</th><th>模块</th><th>用户反馈原文</th><th>是否解决</th>
+          </tr></thead>
+          <tbody id="csBody"></tbody>
+        </table>
+      </div>
+      <div class="note-line" id="csState"><span class="spin"></span>正在加载客服明细…</div>
+    </div>
+  </section>
+
+  <div class="note-block">
+    <div class="sec-head"><h2>客服口径</h2><span class="hint">客服客诉分析</span></div>
+    <div class="note-body">
+      <p><b>口径　</b>客服侧无星级评分，因此不计算差评率，仅统计各 Topic 的反馈量与反馈占比（该 Topic 会话数 ÷ 同期全量客服会话数）；使用所选 profile，内置规则包含客服场景的上下文判断。</p>
+      <p><b>日期　</b>源数据日期列表示整批区间，趋势按导出批次切分而非自然周，不足 5 天的批次以 * 标记；核验表的日期范围按「批次与所选区间有重叠即计入」判定。</p>
+      <p><b>明细　</b>超长原文截断到 600 字并以「…」标记，完整原文见 classification_cs.json。</p>
+    </div>
+  </div>
+  </div>
+  </div>
+
+  <footer>
+    <b>数据说明　</b>Topic 由本地关键词、正则和上下文规则判断，可逐条复核原文。<b>「是否解决」为人工跟进标记</b>，只保存在当前浏览器，不写回历史，不在设备之间同步。可用「导出 CSV」带走当前筛选结果。
+  </footer>
+</div>
+
+<div class="tip" id="tip" role="tooltip" aria-hidden="true"></div>
+
+<script id="payload" type="application/json">{"topics":["播放","风控","广告","下载","网页浏览与搜索"],"profile":{"id":"media-legacy","version":"cab707b4d262","semantic_version":"1.0.0","topics":[{"key":"playback","name":"播放","matcher":"builtin","builtin":"播放","order":0,"enabled":true},{"key":"risk_control","name":"风控","matcher":"builtin","builtin":"风控","order":1,"enabled":true},{"key":"advertising","name":"广告","matcher":"builtin","builtin":"广告","order":2,"enabled":true},{"key":"download","name":"下载","matcher":"builtin","builtin":"下载","order":3,"enabled":true},{"key":"web_search","name":"网页浏览与搜索","matcher":"builtin","builtin":"网页浏览与搜索","order":4,"enabled":true}]},"sources":["IOS","VIVO","OPPO","华为","小米","魅族"],"datasetId":"87e98fca-ac75-4d92-878e-b9b0cf3f7ce5","summary":{"minDate":"2025-01-01","maxDate":"2025-04-28","dataPeriod":"2025-01-01 ～ 2025-04-28","iosCount":36,"andCount":36,"totalCount":72,"channels":{"OPPO":36},"negativeDef":"1～3 星为差评","latestMonth":"2025-04","latestMonthComplete":false,"latestWeek":"2025-04-28 ~ 2025-05-04","latestWeekComplete":false,"lastCompleteMonth":"2025-03","windowStart":"2025-01-28","week7Start":"2025-04-22","week7Range":"2025-04-22 ～ 2025-04-28","monthRange":"2025-01 ～ 2025-04","weekRange":"2025-01-27 ～ 2025-05-04","negativeTotal":30},"baseline":{"monthly":{"range":"2025-01-01 ～ 2025-04-28","ios":36,"and":36,"latest":"2025-04-28"},"weekly":{"range":"2025-01-28 ～ 2025-04-28","ios":28,"and":28,"latest":"2025-04-28"},"week7":{"range":"2025-04-22 ～ 2025-04-28","ios":1,"and":1,"latest":"2025-04-28"}},"overview":{"monthly":{"双端汇总":{"播放":{"total":72,"rel":20,"neg":8,"rate":0.2777777777777778,"negRate":0.1111111111111111},"风控":{"total":72,"rel":6,"neg":6,"rate":0.08333333333333333,"negRate":0.08333333333333333},"广告":{"total":72,"rel":4,"neg":4,"rate":0.05555555555555555,"negRate":0.05555555555555555},"下载":{"total":72,"rel":16,"neg":6,"rate":0.2222222222222222,"negRate":0.08333333333333333},"网页浏览与搜索":{"total":72,"rel":6,"neg":6,"rate":0.08333333333333333,"negRate":0.08333333333333333}},"IOS":{"播放":{"total":36,"rel":10,"neg":4,"rate":0.2777777777777778,"negRate":0.1111111111111111},"风控":{"total":36,"rel":3,"neg":3,"rate":0.08333333333333333,"negRate":0.08333333333333333},"广告":{"total":36,"rel":2,"neg":2,"rate":0.05555555555555555,"negRate":0.05555555555555555},"下载":{"total":36,"rel":8,"neg":3,"rate":0.2222222222222222,"negRate":0.08333333333333333},"网页浏览与搜索":{"total":36,"rel":3,"neg":3,"rate":0.08333333333333333,"negRate":0.08333333333333333}},"AND":{"播放":{"total":36,"rel":10,"neg":4,"rate":0.2777777777777778,"negRate":0.1111111111111111},"风控":{"total":36,"rel":3,"neg":3,"rate":0.08333333333333333,"negRate":0.08333333333333333},"广告":{"total":36,"rel":2,"neg":2,"rate":0.05555555555555555,"negRate":0.05555555555555555},"下载":{"total":36,"rel":8,"neg":3,"rate":0.2222222222222222,"negRate":0.08333333333333333},"网页浏览与搜索":{"total":36,"rel":3,"neg":3,"rate":0.08333333333333333,"negRate":0.08333333333333333}}},"weekly":{"双端汇总":{"播放":{"total":56,"rel":16,"neg":6,"rate":0.2857142857142857,"negRate":0.10714285714285714},"风控":{"total":56,"rel":4,"neg":4,"rate":0.07142857142857142,"negRate":0.07142857142857142},"广告":{"total":56,"rel":2,"neg":2,"rate":0.03571428571428571,"negRate":0.03571428571428571},"下载":{"total":56,"rel":12,"neg":4,"rate":0.21428571428571427,"negRate":0.07142857142857142},"网页浏览与搜索":{"total":56,"rel":4,"neg":4,"rate":0.07142857142857142,"negRate":0.07142857142857142}},"IOS":{"播放":{"total":28,"rel":8,"neg":3,"rate":0.2857142857142857,"negRate":0.10714285714285714},"风控":{"total":28,"rel":2,"neg":2,"rate":0.07142857142857142,"negRate":0.07142857142857142},"广告":{"total":28,"rel":1,"neg":1,"rate":0.03571428571428571,"negRate":0.03571428571428571},"下载":{"total":28,"rel":6,"neg":2,"rate":0.21428571428571427,"negRate":0.07142857142857142},"网页浏览与搜索":{"total":28,"rel":2,"neg":2,"rate":0.07142857142857142,"negRate":0.07142857142857142}},"AND":{"播放":{"total":28,"rel":8,"neg":3,"rate":0.2857142857142857,"negRate":0.10714285714285714},"风控":{"total":28,"rel":2,"neg":2,"rate":0.07142857142857142,"negRate":0.07142857142857142},"广告":{"total":28,"rel":1,"neg":1,"rate":0.03571428571428571,"negRate":0.03571428571428571},"下载":{"total":28,"rel":6,"neg":2,"rate":0.21428571428571427,"negRate":0.07142857142857142},"网页浏览与搜索":{"total":28,"rel":2,"neg":2,"rate":0.07142857142857142,"negRate":0.07142857142857142}}},"week7":{"双端汇总":{"播放":{"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"风控":{"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"广告":{"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"下载":{"total":2,"rel":2,"neg":0,"rate":1.0,"negRate":0.0},"网页浏览与搜索":{"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}},"IOS":{"播放":{"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"风控":{"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"广告":{"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"下载":{"total":1,"rel":1,"neg":0,"rate":1.0,"negRate":0.0},"网页浏览与搜索":{"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}},"AND":{"播放":{"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"风控":{"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"广告":{"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},"下载":{"total":1,"rel":1,"neg":0,"rate":1.0,"negRate":0.0},"网页浏览与搜索":{"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}}}},"monthly":{"双端汇总":{"播放":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":18,"rel":4,"neg":2,"rate":0.2222222222222222,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":18,"rel":6,"neg":2,"rate":0.3333333333333333,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":18,"rel":6,"neg":4,"rate":0.3333333333333333,"negRate":0.2222222222222222},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":18,"rel":4,"neg":0,"rate":0.2222222222222222,"negRate":0.0}],"风控":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":18,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":18,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":18,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":18,"rel":4,"neg":2,"rate":0.2222222222222222,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":18,"rel":4,"neg":0,"rate":0.2222222222222222,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":18,"rel":6,"neg":2,"rate":0.3333333333333333,"negRate":0.1111111111111111}],"网页浏览与搜索":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":18,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":18,"rel":2,"neg":2,"rate":0.1111111111111111,"negRate":0.1111111111111111}]},"IOS":{"播放":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":2,"neg":1,"rate":0.2222222222222222,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":3,"neg":1,"rate":0.3333333333333333,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":3,"neg":2,"rate":0.3333333333333333,"negRate":0.2222222222222222},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":2,"neg":0,"rate":0.2222222222222222,"negRate":0.0}],"风控":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":2,"neg":1,"rate":0.2222222222222222,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":2,"neg":0,"rate":0.2222222222222222,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":3,"neg":1,"rate":0.3333333333333333,"negRate":0.1111111111111111}],"网页浏览与搜索":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111}]},"AND":{"播放":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":2,"neg":1,"rate":0.2222222222222222,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":3,"neg":1,"rate":0.3333333333333333,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":3,"neg":2,"rate":0.3333333333333333,"negRate":0.2222222222222222},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":2,"neg":0,"rate":0.2222222222222222,"negRate":0.0}],"风控":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":2,"neg":1,"rate":0.2222222222222222,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":2,"neg":0,"rate":0.2222222222222222,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":3,"neg":1,"rate":0.3333333333333333,"negRate":0.1111111111111111}],"网页浏览与搜索":[{"period":"2025-01","axis":"25-01","start":"2025-01-01","end":"2025-01-31","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-02","axis":"25-02","start":"2025-02-01","end":"2025-02-28","complete":true,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111},{"period":"2025-03","axis":"25-03","start":"2025-03-01","end":"2025-03-31","complete":true,"total":9,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04","axis":"25-04","start":"2025-04-01","end":"2025-04-30","complete":false,"total":9,"rel":1,"neg":1,"rate":0.1111111111111111,"negRate":0.1111111111111111}]}},"weekly":{"双端汇总":{"播放":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":4,"rel":2,"neg":0,"rate":0.5,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":6,"rel":2,"neg":0,"rate":0.3333333333333333,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":4,"rel":4,"neg":2,"rate":1.0,"negRate":0.5},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":6,"rel":2,"neg":2,"rate":0.3333333333333333,"negRate":0.3333333333333333},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":2,"rel":2,"neg":2,"rate":1.0,"negRate":1.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":6,"rel":4,"neg":0,"rate":0.6666666666666666,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"风控":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":4,"rel":2,"neg":2,"rate":0.5,"negRate":0.5},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":4,"rel":2,"neg":2,"rate":0.5,"negRate":0.5},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":4,"rel":2,"neg":2,"rate":0.5,"negRate":0.5},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":6,"rel":2,"neg":2,"rate":0.3333333333333333,"negRate":0.3333333333333333},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":6,"rel":4,"neg":0,"rate":0.6666666666666666,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":6,"rel":2,"neg":0,"rate":0.3333333333333333,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":4,"rel":2,"neg":2,"rate":0.5,"negRate":0.5},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":2,"rel":2,"neg":0,"rate":1.0,"negRate":0.0}],"网页浏览与搜索":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":4,"rel":2,"neg":2,"rate":0.5,"negRate":0.5},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":6,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":4,"rel":2,"neg":2,"rate":0.5,"negRate":0.5},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":4,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}]},"IOS":{"播放":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":1,"neg":0,"rate":0.5,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":1,"neg":0,"rate":0.3333333333333333,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":2,"neg":1,"rate":1.0,"negRate":0.5},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":1,"neg":1,"rate":0.3333333333333333,"negRate":0.3333333333333333},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":1,"neg":1,"rate":1.0,"negRate":1.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":2,"neg":0,"rate":0.6666666666666666,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"风控":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":1,"neg":1,"rate":0.3333333333333333,"negRate":0.3333333333333333},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":2,"neg":0,"rate":0.6666666666666666,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":1,"neg":0,"rate":0.3333333333333333,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":1,"neg":0,"rate":1.0,"negRate":0.0}],"网页浏览与搜索":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}]},"AND":{"播放":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":1,"neg":0,"rate":0.5,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":1,"neg":0,"rate":0.3333333333333333,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":2,"neg":1,"rate":1.0,"negRate":0.5},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":1,"neg":1,"rate":0.3333333333333333,"negRate":0.3333333333333333},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":1,"neg":1,"rate":1.0,"negRate":1.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":2,"neg":0,"rate":0.6666666666666666,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"风控":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":1,"neg":1,"rate":0.3333333333333333,"negRate":0.3333333333333333},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":2,"neg":0,"rate":0.6666666666666666,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":1,"neg":0,"rate":0.3333333333333333,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":1,"neg":0,"rate":1.0,"negRate":0.0}],"网页浏览与搜索":[{"period":"2025-01-27 ~ 2025-02-02","axis":"01-27","start":"2025-01-27","end":"2025-02-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-03 ~ 2025-02-09","axis":"02-03","start":"2025-02-03","end":"2025-02-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-10 ~ 2025-02-16","axis":"02-10","start":"2025-02-10","end":"2025-02-16","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-02-17 ~ 2025-02-23","axis":"02-17","start":"2025-02-17","end":"2025-02-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-02-24 ~ 2025-03-02","axis":"02-24","start":"2025-02-24","end":"2025-03-02","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-03 ~ 2025-03-09","axis":"03-03","start":"2025-03-03","end":"2025-03-09","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-10 ~ 2025-03-16","axis":"03-10","start":"2025-03-10","end":"2025-03-16","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-17 ~ 2025-03-23","axis":"03-17","start":"2025-03-17","end":"2025-03-23","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-24 ~ 2025-03-30","axis":"03-24","start":"2025-03-24","end":"2025-03-30","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-03-31 ~ 2025-04-06","axis":"03-31","start":"2025-03-31","end":"2025-04-06","complete":true,"total":3,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-07 ~ 2025-04-13","axis":"04-07","start":"2025-04-07","end":"2025-04-13","complete":true,"total":2,"rel":1,"neg":1,"rate":0.5,"negRate":0.5},{"period":"2025-04-14 ~ 2025-04-20","axis":"04-14","start":"2025-04-14","end":"2025-04-20","complete":true,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-21 ~ 2025-04-27","axis":"04-21","start":"2025-04-21","end":"2025-04-27","complete":true,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28 ~ 2025-05-04","axis":"04-28","start":"2025-04-28","end":"2025-05-04","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}]}},"daily7":{"双端汇总":{"播放":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"风控":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":2,"rel":2,"neg":0,"rate":1.0,"negRate":0.0}],"网页浏览与搜索":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":2,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}]},"IOS":{"播放":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"风控":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":1,"neg":0,"rate":1.0,"negRate":0.0}],"网页浏览与搜索":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}]},"AND":{"播放":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"风控":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"广告":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}],"下载":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":1,"neg":0,"rate":1.0,"negRate":0.0}],"网页浏览与搜索":[{"period":"2025-04-22","axis":"04-22","start":"2025-04-22","end":"2025-04-22","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-23","axis":"04-23","start":"2025-04-23","end":"2025-04-23","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-24","axis":"04-24","start":"2025-04-24","end":"2025-04-24","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-25","axis":"04-25","start":"2025-04-25","end":"2025-04-25","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-26","axis":"04-26","start":"2025-04-26","end":"2025-04-26","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-27","axis":"04-27","start":"2025-04-27","end":"2025-04-27","complete":true,"total":0,"rel":0,"neg":0,"rate":0.0,"negRate":0.0},{"period":"2025-04-28","axis":"04-28","start":"2025-04-28","end":"2025-04-28","complete":false,"total":1,"rel":0,"neg":0,"rate":0.0,"negRate":0.0}]}},"star":{"monthly":{"range":"2025-01-01 ～ 2025-04-28","scopes":{"双端汇总":{"total":72,"neg":30,"rate":0.4166666666666667,"stars":{"1":14,"2":14,"3":2,"4":2,"5":40},"bySource":{"IOS":{"total":36,"neg":15,"rate":0.4166666666666667},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":36,"neg":15,"rate":0.4166666666666667},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}},"IOS":{"total":36,"neg":15,"rate":0.4166666666666667,"stars":{"1":7,"2":7,"3":1,"4":1,"5":20},"bySource":{"IOS":{"total":36,"neg":15,"rate":0.4166666666666667},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":0,"neg":0,"rate":0.0},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}},"AND":{"total":36,"neg":15,"rate":0.4166666666666667,"stars":{"1":7,"2":7,"3":1,"4":1,"5":20},"bySource":{"IOS":{"total":0,"neg":0,"rate":0.0},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":36,"neg":15,"rate":0.4166666666666667},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}}}},"weekly":{"range":"2025-01-28 ～ 2025-04-28","scopes":{"双端汇总":{"total":56,"neg":20,"rate":0.35714285714285715,"stars":{"1":10,"2":8,"3":2,"4":2,"5":34},"bySource":{"IOS":{"total":28,"neg":10,"rate":0.35714285714285715},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":28,"neg":10,"rate":0.35714285714285715},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}},"IOS":{"total":28,"neg":10,"rate":0.35714285714285715,"stars":{"1":5,"2":4,"3":1,"4":1,"5":17},"bySource":{"IOS":{"total":28,"neg":10,"rate":0.35714285714285715},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":0,"neg":0,"rate":0.0},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}},"AND":{"total":28,"neg":10,"rate":0.35714285714285715,"stars":{"1":5,"2":4,"3":1,"4":1,"5":17},"bySource":{"IOS":{"total":0,"neg":0,"rate":0.0},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":28,"neg":10,"rate":0.35714285714285715},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}}}},"week7":{"range":"2025-04-22 ～ 2025-04-28","scopes":{"双端汇总":{"total":2,"neg":0,"rate":0.0,"stars":{"1":0,"2":0,"3":0,"4":0,"5":2},"bySource":{"IOS":{"total":1,"neg":0,"rate":0.0},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":1,"neg":0,"rate":0.0},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}},"IOS":{"total":1,"neg":0,"rate":0.0,"stars":{"1":0,"2":0,"3":0,"4":0,"5":1},"bySource":{"IOS":{"total":1,"neg":0,"rate":0.0},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":0,"neg":0,"rate":0.0},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}},"AND":{"total":1,"neg":0,"rate":0.0,"stars":{"1":0,"2":0,"3":0,"4":0,"5":1},"bySource":{"IOS":{"total":0,"neg":0,"rate":0.0},"VIVO":{"total":0,"neg":0,"rate":0.0},"OPPO":{"total":1,"neg":0,"rate":0.0},"华为":{"total":0,"neg":0,"rate":0.0},"小米":{"total":0,"neg":0,"rate":0.0},"魅族":{"total":0,"neg":0,"rate":0.0}}}}}},"cs":{"range":"2025-01-01 ～ 2025-04-28","min":"2025-01-01","max":"2025-04-28","latest":"2025-04-28","batches":4,"total":12,"hitTotal":12,"multi":0,"none":0,"periods":[{"label":"2025-01-01 ～ 2025-01-28","start":"2025-01-01","end":"2025-01-28","axis":"01-01","days":28,"total":3,"short":false},{"label":"2025-02-01 ～ 2025-02-28","start":"2025-02-01","end":"2025-02-28","axis":"02-01","days":28,"total":3,"short":false},{"label":"2025-03-01 ～ 2025-03-28","start":"2025-03-01","end":"2025-03-28","axis":"03-01","days":28,"total":3,"short":false},{"label":"2025-04-01 ～ 2025-04-28","start":"2025-04-01","end":"2025-04-28","axis":"04-01","days":28,"total":3,"short":false}],"overview":{"播放":{"total":12,"rel":4,"rate":0.3333333333333333},"风控":{"total":12,"rel":0,"rate":0.0},"广告":{"total":12,"rel":0,"rate":0.0},"下载":{"total":12,"rel":4,"rate":0.3333333333333333},"网页浏览与搜索":{"total":12,"rel":4,"rate":0.3333333333333333}},"byModule":{"播放":[{"file":"support.csv","label":"2025-01-01 ～ 2025-01-28","start":"2025-01-01","end":"2025-01-28","axis":"01-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-02-01 ～ 2025-02-28","start":"2025-02-01","end":"2025-02-28","axis":"02-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-03-01 ～ 2025-03-28","start":"2025-03-01","end":"2025-03-28","axis":"03-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-04-01 ～ 2025-04-28","start":"2025-04-01","end":"2025-04-28","axis":"04-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false}],"风控":[{"file":"support.csv","label":"2025-01-01 ～ 2025-01-28","start":"2025-01-01","end":"2025-01-28","axis":"01-01","total":3,"rel":0,"rate":0.0,"short":false},{"file":"support.csv","label":"2025-02-01 ～ 2025-02-28","start":"2025-02-01","end":"2025-02-28","axis":"02-01","total":3,"rel":0,"rate":0.0,"short":false},{"file":"support.csv","label":"2025-03-01 ～ 2025-03-28","start":"2025-03-01","end":"2025-03-28","axis":"03-01","total":3,"rel":0,"rate":0.0,"short":false},{"file":"support.csv","label":"2025-04-01 ～ 2025-04-28","start":"2025-04-01","end":"2025-04-28","axis":"04-01","total":3,"rel":0,"rate":0.0,"short":false}],"广告":[{"file":"support.csv","label":"2025-01-01 ～ 2025-01-28","start":"2025-01-01","end":"2025-01-28","axis":"01-01","total":3,"rel":0,"rate":0.0,"short":false},{"file":"support.csv","label":"2025-02-01 ～ 2025-02-28","start":"2025-02-01","end":"2025-02-28","axis":"02-01","total":3,"rel":0,"rate":0.0,"short":false},{"file":"support.csv","label":"2025-03-01 ～ 2025-03-28","start":"2025-03-01","end":"2025-03-28","axis":"03-01","total":3,"rel":0,"rate":0.0,"short":false},{"file":"support.csv","label":"2025-04-01 ～ 2025-04-28","start":"2025-04-01","end":"2025-04-28","axis":"04-01","total":3,"rel":0,"rate":0.0,"short":false}],"下载":[{"file":"support.csv","label":"2025-01-01 ～ 2025-01-28","start":"2025-01-01","end":"2025-01-28","axis":"01-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-02-01 ～ 2025-02-28","start":"2025-02-01","end":"2025-02-28","axis":"02-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-03-01 ～ 2025-03-28","start":"2025-03-01","end":"2025-03-28","axis":"03-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-04-01 ～ 2025-04-28","start":"2025-04-01","end":"2025-04-28","axis":"04-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false}],"网页浏览与搜索":[{"file":"support.csv","label":"2025-01-01 ～ 2025-01-28","start":"2025-01-01","end":"2025-01-28","axis":"01-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-02-01 ～ 2025-02-28","start":"2025-02-01","end":"2025-02-28","axis":"02-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-03-01 ～ 2025-03-28","start":"2025-03-01","end":"2025-03-28","axis":"03-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false},{"file":"support.csv","label":"2025-04-01 ～ 2025-04-28","start":"2025-04-01","end":"2025-04-28","axis":"04-01","total":3,"rel":1,"rate":0.3333333333333333,"short":false}]}}}</script>
+<script src="assets/details.js"></script>
+<script>
+"use strict";
+
+const SCOPES = ["双端汇总","IOS","AND"];
+
+const D = JSON.parse(document.getElementById("payload").textContent);
+const TOPICS = D.topics;
+const SOURCES = D.sources;
+
+function isNegative(r){ return Number.isInteger(r.s) && r.s >= 1 && r.s <= 3; }
+
+const DETAILS = (window.__DETAILS__ || []).map(a=>({i:a[0], d:a[1], p:a[2], c:a[3], s:a[4], t:a[5], x:a[6]}));
+
+let DETAILS_CS = [];
+function parseCsDetails(){
+  DETAILS_CS = (window.__DETAILS_CS__ || []).map(a=>({
+    id: "CS" + String(a[0]).padStart(6, "0"),
+    p: a[1], t: a[2], x: a[3]
+  }));
+}
+
+const GEO_W = 650, GEO_L = 44, GEO_R = 14, GEO_T = 14, GEO_B = 42, GEO_H = 262;
+const PAGE_SIZE = 300;
+
+let scope = "双端汇总";
+
+let mode = "monthly";
+let dStart = D.summary.minDate, dEnd = D.summary.maxDate;
+let fPlatform = "双端汇总", fTopic = "全部";
+let onlyNeg = false;
+const vis = Object.fromEntries(TOPICS.map(t=>[t,"both"]));
+
+const MODES = [["monthly","月度趋势"],["weekly","自然周趋势"],["week7","近一周趋势"]];
+function modeRange(md){
+  if(md==="monthly") return `${D.summary.minDate.slice(0,7)} 至 ${D.summary.maxDate.slice(0,7)}`;
+  if(md==="weekly")  return `${D.summary.windowStart} 至 ${D.summary.maxDate}`;
+  return `${D.summary.week7Start} 至 ${D.summary.maxDate}`;
+}
+function modeName(md){
+  return md==="monthly" ? "月度" : md==="weekly" ? "周度" : "近一周";
+}
+
+function modeWindow(md){
+  if(md==="monthly") return [D.summary.minDate, D.summary.maxDate];
+  if(md==="weekly")  return [D.summary.windowStart, D.summary.maxDate];
+  return [D.summary.week7Start, D.summary.maxDate];
+}
+
+const LS_KEY = "app_feedback_trends_solved_" + D.datasetId;
+let solved = new Set();
+try{ solved = new Set(JSON.parse(localStorage.getItem(LS_KEY) || "[]")); }catch(e){}
+function saveSolved(){ try{ localStorage.setItem(LS_KEY, JSON.stringify([...solved])); }catch(e){} }
+function refreshSolvedViews(){ renderDetails(); if(DETAILS_CS.length) renderCsDetails(); }
+
+const $ = id => document.getElementById(id);
+const pct = n => (n*100).toFixed(2) + "%";
+const pct1 = n => (n*100).toFixed(1) + "%";
+const num = n => Number(n).toLocaleString("zh-CN");
+const clamp = (v,a,b) => v<a?a:v>b?b:v;
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const rangeHTML = s => esc(s).split("～")
+  .map(part=>`<span class="nb">${part}</span>`)
+  .join("～<wbr>");
+function addDays(s,n){const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+
+function setCollapsed(group, on){
+  group.classList.toggle("collapsed", !!on);
+  const head = group.querySelector(":scope > .part");
+  if(head) head.setAttribute("aria-expanded", on ? "false" : "true");
+}
+
+function expandSection(node){
+  const group = node && node.closest ? node.closest(".part-group") : null;
+  if(group && group.classList.contains("collapsed")) setCollapsed(group, false);
+  return group;
+}
+function initCollapse(){
+  document.querySelectorAll(".part-group").forEach(group=>{
+    const head = group.querySelector(":scope > .part");
+    if(!head) return;
+    head.setAttribute("role", "button");
+    head.setAttribute("tabindex", "0");
+    setCollapsed(group, false);   // 默认展开
+    const toggle = ()=>{
+      const willExpand = group.classList.contains("collapsed");
+      setCollapsed(group, !willExpand);
+
+      if(willExpand && group.querySelector("#csBaseline, #csBody")) loadCsDetails();
+    };
+    head.addEventListener("click", e=>{
+
+      if(e.target.closest("button,select,input,a")) return;
+      toggle();
+    });
+    head.addEventListener("keydown", e=>{
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(); }
+    });
+  });
+}
+
+function starSources(sc){
+  if(sc === "IOS") return ["IOS"];
+  if(sc === "AND") return SOURCES.filter(s=>s !== "IOS");
+  return SOURCES.slice();
+}
+
+function renderStar(){
+  const blk = D.star[mode];
+  const cur = blk.scopes[scope];
+  $("starHint").textContent = `${blk.range} · ${scope}`;
+
+  const side = SCOPES.filter(s=>s !== scope).map(s=>{
+    const o = blk.scopes[s];
+    return `<div>
+      <span class="k">${s} 差评率</span>
+      <span class="v">${pct(o.rate)}</span>
+      <span class="star-sub" style="margin-top:2px">${num(o.neg)} / ${num(o.total)} 条</span>
+    </div>`;
+  }).join("");
+
+  $("starbox").innerHTML = `
+    <div>
+      <span class="star-label">${esc(scope)} 差评率</span>
+      <div class="star-value">${pct(cur.rate)}</div>
+      <div class="star-sub">全量 <b>${num(cur.total)}</b> 条评论中，一至三星 <b>${num(cur.neg)}</b> 条</div>
+    </div>
+    <div class="star-side">${side}</div>`;
+
+  const list = starSources(scope);
+  $("srcgrid").dataset.n = list.length;
+  const maxSrc = Math.max(...list.map(s=>cur.bySource[s].rate), .001);
+  $("srcgrid").innerHTML = list.map(s=>{
+    const b = cur.bySource[s];
+    const zero = b.total === 0;
+    return `<div class="src-cell">
+      <span class="src-name">${esc(s || "未指定渠道")}</span>
+      <span class="src-rate"${zero ? ' style="color:var(--ink-4)"' : ""}>${zero ? "—" : pct(b.rate)}</span>
+      <span class="src-meta">${num(b.neg)} / ${num(b.total)} 条</span>
+      <div class="bar"><i style="width:${zero ? 0 : (b.rate/maxSrc*100).toFixed(1)}%"></i></div>
+    </div>`;
+  }).join("");
+
+  const st = cur.stars;
+  const mx = Math.max(...[1,2,3,4,5].map(k=>st[String(k)] || 0), 1);
+  const tone = k => k <= 3 ? "var(--neg)" : "var(--accent)";
+  $("stardist").innerHTML =
+    `<div class="sd-row" style="padding-bottom:9px">
+       <span class="sd-name">星级分布</span><span></span>
+       <span class="sd-val">条数 · 占比</span>
+     </div>` +
+    [1,2,3,4,5].map(k=>{
+      const v = st[String(k)] || 0;
+      return `<div class="sd-row">
+        <span class="sd-name">${k} 星${k <= 3 ? "" : "<span class=\"sd-mark\">不作待处理</span>"}</span>
+        <span class="sd-bar"><i style="width:${(v/mx*100).toFixed(1)}%;background:${tone(k)}"></i></span>
+        <span class="sd-val">${num(v)} · ${cur.total ? pct(v/cur.total) : "—"}</span>
+      </div>`;
+    }).join("") + (st.unrated ? `<div class="sd-row"><span class="sd-name">无星级</span><span></span><span class="sd-val">${num(st.unrated)} · ${cur.total ? pct(st.unrated/cur.total) : "—"}</span></div>` : "");
+}
+
+function renderBaseline(){
+
+  const b = D.baseline[mode];
+  const cell = (v,k)=>`<div class="base-cell"><span class="v">${v}</span><span class="k">${esc(k)}</span></div>`;
+  const scopeTotal = scope === "IOS" ? b.ios : (scope === "AND" ? b.and : b.ios + b.and);
+
+  const scopeLabel = scope === "双端汇总" ? "样本量" : `样本量（${scope}）`;
+  $("baseline").innerHTML = [
+    cell(rangeHTML(b.range), "数据周期"),
+    cell(num(scopeTotal) + " 条", scopeLabel),
+    cell(`${num(b.ios)} / ${num(b.and)}`, "IOS · AND"),
+    cell("1～3 星为差评", "差评口径")
+  ].join("");
+  $("baseline").dataset.n = "4";
+}
+
+function renderAll(){
+
+  [renderBaseline, renderStar, renderCards, renderCharts,
+   renderCsBaseline, renderCsCards, renderCsCharts, refreshCsHint].forEach(fn=>{
+    try{ fn(); }catch(e){ console.warn("渲染失败：" + fn.name, e); }
+  });
+}
+function renderSwitches(){
+  $("platformSwitch").innerHTML = SCOPES.map(s=>
+    `<button data-scope="${s}" aria-pressed="${s===scope}">${s}</button>`).join("");
+  const segHTML = MODES.map(([m,label])=>
+    `<button data-mode="${m}" aria-pressed="${m===mode}">${label}</button>`).join("");
+  ["starPeriodSwitch","csPeriodSwitch"].forEach(id=>{ const el = $(id); if(el) el.innerHTML = segHTML; });
+  document.querySelectorAll("#platformSwitch button").forEach(b=>{
+
+    b.onclick = ()=>{ scope = b.dataset.scope; renderSwitches(); renderBaseline(); renderStar(); renderCards(); renderCharts(); };
+  });
+
+  document.querySelectorAll("#starPeriodSwitch button, #csPeriodSwitch button").forEach(b=>{
+    b.onclick = ()=>{ mode = b.dataset.mode; renderSwitches(); renderAll(); };
+  });
+}
+
+function renderCards(){
+  const ov = D.overview[mode][scope];
+  const maxRate = Math.max(...TOPICS.map(t=>ov[t].rate), .001);
+  $("cards").innerHTML = TOPICS.map((t,i)=>{
+    const o = ov[t];
+    return `<div class="card reveal" style="animation-delay:${i*50}ms" data-topic="${t}" tabindex="0" role="button" aria-label="查看${t}趋势">
+      <div class="name">${t}</div>
+      <div class="big">${pct(o.rate)}</div>
+      <div class="bar"><i style="width:${(o.rate/maxRate*100).toFixed(1)}%;animation-delay:${120+i*60}ms"></i></div>
+      <div class="rows">
+        <div class="row"><span>相关评论</span><b>${num(o.rel)}</b></div>
+        <div class="row"><span>差评反馈率</span><b class="${o.negRate>0.02?"neg":""}">${pct(o.negRate)}</b></div>
+        <div class="row"><span>差评数</span><b>${num(o.neg)}</b></div>
+        <div class="row"><span>全量评论</span><b>${num(o.total)}</b></div>
+      </div>
+    </div>`;
+  }).join("");
+  document.querySelectorAll(".card").forEach(c=>{
+    const go = ()=>{ const el = $("chart-" + c.dataset.topic); if(el){ expandSection(el); el.scrollIntoView({behavior:"smooth", block:"center"}); } };
+    c.onclick = go;
+    c.onkeydown = e=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); go(); } };
+  });
+}
+
+function niceMax(v){
+  const steps = [0.01,0.02,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.75,1];
+  for(const s of steps) if(v <= s*1.06) return s;
+  return Math.ceil(v*10)/10;
+}
+function series(){
+  return (mode==="monthly" ? D.monthly : mode==="weekly" ? D.weekly : D.daily7)[scope];
+}
+
+function chartSVG(rows, t){
+  if(!rows.length) return `<div class="chart-empty">当前口径没有可展示的数据</div>`;
+  const show = [["rate","total","总反馈率"],["negRate","negative","差评反馈率"]]
+    .filter(x=>vis[t]==="both" || vis[t]===x[1]);
+  const W = GEO_W, H = GEO_H, L = GEO_L, R = GEO_R, T = GEO_T, B = GEO_B;
+  const pW = W-L-R, pH = H-T-B;
+  const max = niceMax(Math.max(...rows.flatMap(r=>show.map(s=>r[s[0]])), .001));
+  const X = i => L + (rows.length===1 ? pW/2 : i*pW/(rows.length-1));
+  const Y = v => T + pH - v/max*pH;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${t}反馈率趋势">`;
+  for(let i=0;i<=4;i++){
+    const yy = T + i*pH/4, v = max*(1-i/4);
+    svg += `<line class="grid-line" x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}"/>`;
+    svg += `<text class="axis-txt y" x="${L-8}" y="${yy+3.5}">${(v*100).toFixed(1)}%</text>`;
+  }
+  const step = Math.max(1, Math.ceil(rows.length/6));
+  rows.forEach((r,i)=>{
+    if(i%step===0 || i===rows.length-1)
+      svg += `<text class="axis-txt x" x="${X(i)}" y="${H-16}">${esc(r.axis)}${r.complete?"":"*"}</text>`;
+  });
+  show.forEach(([key,cls])=>{
+    const pts = rows.map((r,i)=>`${X(i)},${Y(r[key])}`).join(" ");
+    svg += `<polygon class="area ${cls}" points="${L},${T+pH} ${pts} ${W-R},${T+pH}"/>`;
+    svg += `<polyline class="line ${cls}" points="${pts}"/>`;
+  });
+  svg += `<line class="cross" x1="0" y1="${T}" x2="0" y2="${T+pH}"/>`;
+  show.forEach(([key,cls])=>{
+    rows.forEach((r,i)=>{
+      svg += `<circle class="dot" data-series="${cls}" data-i="${i}" cx="${X(i)}" cy="${Y(r[key])}" r="4" fill="${cls==="total"?"var(--accent)":"var(--neg)"}"/>`;
+    });
+  });
+  svg += `<rect class="hit" x="${L}" y="${T}" width="${pW}" height="${pH}"/>`;
+  return svg + `</svg>`;
+}
+
+function renderCharts(){
+  const src = series();
+  $("trendTitle").textContent = `趋势分析　${modeName(mode)} · ${modeRange(mode)}`;
+
+  const partials = [...new Set(TOPICS.flatMap(t=>src[t].filter(r=>!r.complete).map(r=>r.period)))];
+  if(partials.length){
+    $("weekNote").textContent = `带 * 的周期（${partials.join("、")}）统计区间尚未完整，仅供观察，不与完整周期直接比较。`;
+    $("weekNote").classList.add("on");
+  }else{
+
+    $("weekNote").textContent = "";
+    $("weekNote").classList.remove("on");
+  }
+
+  $("charts").innerHTML = TOPICS.map((t,i)=>{
+    const rows = src[t], v = vis[t];
+    return `<div class="chart reveal" id="chart-${t}" style="animation-delay:${i*50}ms">
+      <div class="chart-head">
+        <div class="chart-title">${t}</div>
+        <div class="legend">
+          <button class="${v==="both"||v==="total"?"active":""}" data-topic="${t}" data-series="total" aria-pressed="${v==="both"||v==="total"}"><i class="swatch total"></i>总反馈率</button>
+          <button class="${v==="both"||v==="negative"?"active":""}" data-topic="${t}" data-series="negative" aria-pressed="${v==="both"||v==="negative"}"><i class="swatch negative"></i>差评反馈率</button>
+        </div>
+      </div>
+      <div class="plot" data-topic="${t}">${chartSVG(rows,t)}</div>
+    </div>`;
+  }).join("");
+
+  bindLegends();
+  bindPlots();
+}
+
+function bindLegends(){
+
+  document.querySelectorAll("#charts .legend button").forEach(b=>{
+    b.onclick = e=>{
+      e.stopPropagation();
+      const t = b.dataset.topic, s = b.dataset.series;
+      vis[t] = vis[t]===s ? "both" : s;
+      renderCharts();
+    };
+  });
+}
+
+function bindPlots(){
+  const tip = $("tip");
+  const hide = ()=>{ tip.classList.remove("on"); tip.setAttribute("aria-hidden","true"); };
+
+  document.querySelectorAll("#charts .plot").forEach(plot=>{
+    const t = plot.dataset.topic;
+    const svg = plot.querySelector("svg");
+    if(!svg) return;
+    const cross = svg.querySelector(".cross");
+    const hit = svg.querySelector(".hit");
+    const dots = [...svg.querySelectorAll(".dot")];
+    const rows = series()[t];
+    if(!rows.length) return;
+
+    const pW = GEO_W - GEO_L - GEO_R;
+    let idx = -1;
+
+    const toUserX = clientX => {
+      const ctm = svg.getScreenCTM && svg.getScreenCTM();
+      if(ctm && typeof DOMPoint === "function"){
+        try{ return new DOMPoint(clientX, 0).matrixTransform(ctm.inverse()).x; }catch(e){}
+      }
+      const box = svg.getBoundingClientRect();
+      return (clientX - box.left) / box.width * GEO_W;
+    };
+
+    const show = clientX=>{
+      const box = svg.getBoundingClientRect();
+      const ux = toUserX(clientX);
+      idx = Math.round(clamp((ux - GEO_L) / pW, 0, 1) * (rows.length - 1));
+      const cx = GEO_L + (rows.length===1 ? pW/2 : idx*pW/(rows.length-1));
+      cross.setAttribute("x1", cx); cross.setAttribute("x2", cx);
+      cross.classList.add("on");
+      dots.forEach(d=>d.classList.toggle("on", Number(d.dataset.i)===idx));
+
+      const r = rows[idx];
+      tip.innerHTML =
+        `<div class="t-h">${esc(t)}　${esc(r.period)}${r.complete?"":`<span style="color:oklch(80% .08 80)">（未完整）</span>`}</div>` +
+        `<div class="t-r"><span>全量评论数</span><b>${num(r.total)}</b></div>` +
+        `<div class="t-r"><span>专题评论数</span><b>${num(r.rel)}</b></div>` +
+        `<div class="t-r"><span>总反馈率</span><b>${pct(r.rate)}</b></div>` +
+        `<div class="t-sep"></div>` +
+        `<div class="t-r"><span>专题差评数</span><b>${num(r.neg)}</b></div>` +
+        `<div class="t-r"><span>差评反馈率</span><b>${pct(r.negRate)}</b></div>` +
+        `<div class="t-hint">点击可定位到该周期 · ${esc(scope)} · ${esc(t)} 的评论明细</div>`;
+      tip.classList.add("on");
+      tip.setAttribute("aria-hidden","false");
+
+      const pad = 12, tw = tip.offsetWidth, th = tip.offsetHeight;
+      let x = clientX + pad, y = box.top + box.height * 0.16;
+      if(x + tw > innerWidth - 8) x = clientX - tw - pad;
+      if(y + th > innerHeight - 8) y = innerHeight - th - 8;
+      tip.style.left = Math.max(8, x) + "px";
+      tip.style.top  = Math.max(8, y) + "px";
+    };
+
+    hit.addEventListener("pointermove", e=>show(e.clientX));
+    hit.addEventListener("pointerdown", e=>show(e.clientX));
+    svg.addEventListener("pointerleave", hide);
+    hit.addEventListener("click", ()=>{
+      if(idx < 0) return;
+      const r = rows[idx];
+      fPlatform = scope; fTopic = t; onlyNeg = false;
+      $("onlyNeg").checked = false;
+
+      dStart = clamp(r.start, D.summary.minDate, D.summary.maxDate);
+      dEnd   = clamp(r.end,   D.summary.minDate, D.summary.maxDate);
+      fillFilterControls(); syncRange(); renderDetails();
+      hide();
+
+      const audit = document.querySelector(".audit");
+      expandSection(audit);
+      audit.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+function fillFilterControls(){
+  $("detailPlatform").innerHTML = SCOPES.map(s=>`<option ${s===fPlatform?"selected":""}>${s}</option>`).join("");
+  $("detailTopic").innerHTML = ["全部"].concat(TOPICS).map(t=>`<option ${t===fTopic?"selected":""}>${t}</option>`).join("");
+}
+function syncRange(){
+  $("rangeTrigger").textContent = `${dStart} 至 ${dEnd}`;
+  $("rangeStart").value = dStart;
+  $("rangeEnd").value = dEnd;
+}
+function setQuick(type){
+  const min = D.summary.minDate, max = D.summary.maxDate;
+  let s = dStart, e = dEnd;
+  if(type==="week")  s = clamp(addDays(max,-6), min, max);
+  if(type==="month") s = clamp(addDays(max,-29), min, max);
+  if(type==="three") s = clamp(D.summary.windowStart, min, max);
+
+  if(type==="dashboard"){
+    const w = modeWindow(mode);
+    s = clamp(w[0], min, max); e = clamp(w[1], min, max);
+  }
+  if(type==="all"){ s = min; e = max; }
+  $("rangeStart").value = s;
+  $("rangeEnd").value = e;
+}
+function closePanel(){
+  $("rangePanel").classList.remove("open");
+  $("rangeTrigger").setAttribute("aria-expanded","false");
+}
+function applyRange(){
+  let a = $("rangeStart").value, b = $("rangeEnd").value;
+  if(!a || !b) return;
+  if(a > b) [a,b] = [b,a];
+  dStart = clamp(a, D.summary.minDate, D.summary.maxDate);
+  dEnd   = clamp(b, D.summary.minDate, D.summary.maxDate);
+  syncRange(); closePanel(); renderDetails();
+}
+
+function currentRows(){
+  const q = $("detailSearch").value.trim().toLowerCase();
+  const sf = $("solvedFilter").value;
+  return DETAILS.filter(r=>{
+    if(r.d < dStart || r.d > dEnd) return false;
+    if(fPlatform !== "双端汇总" && r.p !== fPlatform) return false;
+    if(fTopic !== "全部" && r.t.indexOf(fTopic) < 0) return false;
+    if(onlyNeg && !(isNegative(r))) return false;
+    if(sf !== "all" && (!isNegative(r) || (sf === "solved") !== solved.has(r.i))) return false;
+    if(q && r.x.toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+}
+
+function renderDetails(){
+  const rows = currentRows();
+  const negN = rows.filter(r=>isNegative(r)).length;
+  const solvedN = rows.filter(r=>solved.has(r.i)).length;
+  $("detailCount").textContent = rows.length
+    ? `${num(rows.length)} 条 · 差评 ${num(negN)} 条 · 已解决 ${num(solvedN)} 条 · 展示前 ${num(Math.min(rows.length, PAGE_SIZE))} 条`
+    : "无匹配结果";
+
+  $("detailState").style.display = "none";
+  $("detailBody").innerHTML = rows.slice(0, PAGE_SIZE).map(r=>{
+    const neg = isNegative(r);
+    const on = solved.has(r.i);
+    const badges = r.t.length
+      ? r.t.map(t=>`<span class="badge">${esc(t)}</span>`).join("")
+      : `<span class="badge none">未命中</span>`;
+    return `<tr>
+      <td class="num" data-l="ID">${esc(r.i)}</td>
+      <td class="num" data-l="日期">${esc(r.d)}</td>
+      <td data-l="平台">${esc(r.p)}</td>
+      <td data-l="渠道">${r.c ? esc(r.c) : "—"}</td>
+      <td class="num" data-l="星级"><span class="stars ${neg?"neg":""}">${r.s == null ? "无星级" : r.s + " 星"}</span></td>
+      <td data-l="专题">${badges}</td>
+      <td class="comment" data-l="评论原文">${esc(r.x)}</td>
+      <td data-l="是否解决">
+        ${neg
+          ? `<label class="chk ${on?"on":""}">
+               <input type="checkbox" data-id="${esc(r.i)}" ${on?"checked":""}>
+               <span>${on?"已解决":"待处理"}</span>
+             </label>`
+          : `<span class="dash" title="四星、五星与无星级反馈保留记录，不作为待处理反馈">-</span>`}
+      </td>
+    </tr>`;
+  }).join("");
+
+  if(!rows.length){
+    $("detailBody").innerHTML = `<tr><td colspan="8"><div class="empty">当前筛选条件下没有评论</div></td></tr>`;
+  }
+}
+
+function bindSolved(){
+  $("detailBody").addEventListener("change", e=>{
+    const cb = e.target.closest('input[type="checkbox"]');
+    if(!cb) return;
+    const id = String(cb.dataset.id);
+    if(cb.checked) solved.add(id); else solved.delete(id);
+    saveSolved();
+    const label = cb.closest(".chk");
+    label.classList.toggle("on", cb.checked);
+    label.querySelector("span").textContent = cb.checked ? "已解决" : "待处理";
+    const total = currentRows().filter(r=>solved.has(r.i)).length;
+    $("detailCount").textContent = $("detailCount").textContent
+      .replace(/已解决 [\d,]+ 条/, "已解决 " + num(total) + " 条");
+  });
+}
+
+function exportCSV(){
+  const rows = currentRows();
+  if(!rows.length){ alert("当前筛选结果为空，无需导出。"); return; }
+  const head = ["ID","日期","平台","渠道","星级","是否差评","专题","评论原文","是否解决"];
+  const cell = v => `"${String(v).replace(/"/g,'""')}"`;
+  const lines = [head.map(cell).join(",")];
+  rows.forEach(r=>{
+    lines.push([r.i, r.d, r.p, r.c, r.s ?? "", (isNegative(r)?"是":"否"),
+                r.t.join("/") || "未命中", r.x,
+                (isNegative(r) ? (solved.has(r.i)?"是":"否") : "-")].map(cell).join(","));
+  });
+  const blob = new Blob(["\uFEFF" + lines.join("\r\n")], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `IOS_AND专题反馈_${fPlatform}_${fTopic}_${dStart}_${dEnd}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+}
+
+let csModule = "全部";
+let csStart = D.cs.min;
+let csEnd = D.cs.max;
+let csLoadState = "idle";   // idle | loading | ready | error
+const CS_PAGE = 300;
+
+const csPeriodLabel = pi => (D.cs.periods[pi] ? D.cs.periods[pi].label : "—");
+
+function csKeptPeriods(){
+  const w = modeWindow(mode);
+  return D.cs.periods.filter(p=>!(p.end < w[0] || p.start > w[1]));
+}
+function csKeptRows(t){
+  const w = modeWindow(mode);
+  return D.cs.byModule[t].filter(r=>!(r.end < w[0] || r.start > w[1]));
+}
+function csKeptTotal(){
+  return csKeptPeriods().reduce((s,p)=>s+p.total, 0);
+}
+function csKeptRange(){
+  const kept = csKeptPeriods();
+  if(!kept.length) return D.cs.range;
+  return `${kept[0].start} ～ ${kept[kept.length-1].end}`;
+}
+function refreshCsHint(){
+  $("csHint").textContent = `${csKeptRange()} · 客服会话`;
+}
+
+function csSyncRange(){
+  $("csRangeTrigger").textContent = `${csStart} 至 ${csEnd}`;
+  $("csRangeStart").value = csStart;
+  $("csRangeEnd").value = csEnd;
+}
+function csSetQuick(type){
+  const min = D.cs.min, max = D.cs.max;
+  let s = csStart, e = csEnd;
+  if(type === "week")  s = clamp(addDays(max,-6), min, max);
+  if(type === "month") s = clamp(addDays(max,-29), min, max);
+  if(type === "three") s = clamp(addDays(max,-89), min, max);
+
+  if(type === "dashboard"){ const w = modeWindow(mode); s = clamp(w[0], min, max); e = clamp(w[1], min, max); }
+  if(type === "all"){ s = min; e = max; }
+  $("csRangeStart").value = s;
+  $("csRangeEnd").value = e;
+}
+function csClosePanel(){
+  $("csRangePanel").classList.remove("open");
+  $("csRangeTrigger").setAttribute("aria-expanded","false");
+}
+function csApplyRange(){
+  let a = $("csRangeStart").value, b = $("csRangeEnd").value;
+  if(!a || !b) return;
+  if(a > b) [a,b] = [b,a];
+  csStart = clamp(a, D.cs.min, D.cs.max);
+  csEnd   = clamp(b, D.cs.min, D.cs.max);
+  csSyncRange(); csClosePanel(); renderCsDetails();
+}
+
+function loadCsDetails(){
+  if(csLoadState === "loading" || csLoadState === "ready" || csLoadState === "error") return;
+  if(window.__DETAILS_CS__){
+    csLoadState = "ready"; parseCsDetails(); renderCsDetails(); return;
+  }
+  csLoadState = "loading";
+  const el = document.createElement("script");
+  el.src = "assets/details_cs.js";
+  el.onload = ()=>{
+    if(!window.__DETAILS_CS__){
+      csLoadState = "error";
+      $("csState").innerHTML = "客服明细数据格式异常（assets/details_cs.js）。";
+      return;
+    }
+    csLoadState = "ready";
+    parseCsDetails();
+    renderCsDetails();
+  };
+  el.onerror = ()=>{
+    csLoadState = "error";
+    $("csState").innerHTML = "未能加载客服明细数据（assets/details_cs.js）。请确认该文件与 report.html 位于同一目录下。";
+  };
+  document.head.appendChild(el);
+}
+
+function renderCsBaseline(){
+
+  const cell = (v,k)=>`<div class="base-cell"><span class="v">${v}</span><span class="k">${esc(k)}</span></div>`;
+  $("csBaseline").innerHTML = [
+    cell(rangeHTML(csKeptRange()), "数据周期"),
+    cell(num(csKeptTotal()) + " 条", "客服会话")
+  ].join("");
+  $("csBaseline").dataset.n = "2";
+}
+
+function renderCsCards(){
+
+  const tot = csKeptTotal();
+  const ov = {};
+  TOPICS.forEach(t=>{
+    const rel = csKeptRows(t).reduce((s,r)=>s+r.rel, 0);
+    ov[t] = {rel, total: tot, rate: tot ? rel/tot : 0};
+  });
+  const maxRate = Math.max(...TOPICS.map(t=>ov[t].rate), .001);
+  $("csCards").innerHTML = TOPICS.map((t,i)=>{
+    const o = ov[t];
+    return `<div class="card reveal" style="animation-delay:${i*50}ms" data-cs="${t}" tabindex="0" role="button" aria-label="查看${t}客服趋势">
+      <div class="name">${t}</div>
+      <div class="big">${pct(o.rate)}</div>
+      <div class="bar"><i style="width:${(o.rate/maxRate*100).toFixed(1)}%;animation-delay:${120+i*60}ms"></i></div>
+      <div class="rows">
+        <div class="row"><span>反馈量</span><b>${num(o.rel)}</b></div>
+        <div class="row"><span>全量会话</span><b>${num(o.total)}</b></div>
+      </div>
+    </div>`;
+  }).join("");
+  document.querySelectorAll("#csCards .card").forEach(c=>{
+    const go = ()=>{ const el = $("cs-chart-" + c.dataset.cs); if(el){ expandSection(el); el.scrollIntoView({behavior:"smooth", block:"center"}); } };
+    c.onclick = go;
+    c.onkeydown = e=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); go(); } };
+  });
+}
+
+function csChartSVG(rows, t){
+  if(!rows.length) return `<div class="chart-empty">当前口径没有可展示的数据</div>`;
+  const W = GEO_W, H = GEO_H, L = GEO_L, R = GEO_R, T = GEO_T, B = GEO_B;
+  const pW = W-L-R, pH = H-T-B;
+  const max = niceMax(Math.max(...rows.map(r=>r.rate), .001));
+  const X = i => L + (rows.length===1 ? pW/2 : i*pW/(rows.length-1));
+  const Y = v => T + pH - v/max*pH;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${t}客服反馈占比趋势">`;
+  for(let i=0;i<=4;i++){
+    const yy = T + i*pH/4, v = max*(1-i/4);
+    svg += `<line class="grid-line" x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}"/>`;
+    svg += `<text class="axis-txt y" x="${L-8}" y="${yy+3.5}">${(v*100).toFixed(1)}%</text>`;
+  }
+  rows.forEach((r,i)=>{
+    svg += `<text class="axis-txt x" x="${X(i)}" y="${H-16}">${esc(r.axis)}${r.short?"*":""}</text>`;
+  });
+  const pts = rows.map((r,i)=>`${X(i)},${Y(r.rate)}`).join(" ");
+  svg += `<polygon class="area total" points="${L},${T+pH} ${pts} ${W-R},${T+pH}"/>`;
+  svg += `<polyline class="line total" points="${pts}"/>`;
+  svg += `<line class="cross" x1="0" y1="${T}" x2="0" y2="${T+pH}"/>`;
+  rows.forEach((r,i)=>{
+    svg += `<circle class="dot" data-series="total" data-i="${i}" cx="${X(i)}" cy="${Y(r.rate)}" r="4" fill="var(--accent)"/>`;
+  });
+  svg += `<rect class="hit" x="${L}" y="${T}" width="${pW}" height="${pH}"/>`;
+  return svg + `</svg>`;
+}
+
+function renderCsCharts(){
+
+  $("csTrendTitle").textContent = `趋势分析　批次 · ${csKeptRange()}`;
+
+  const short = csKeptPeriods().filter(p=>p.days < 5).map(p=>p.label);
+  if(short.length){
+    $("csNote").textContent = `带 * 的批次覆盖天数不足 5 天（${short.join("、")}），占比会受分母偏小影响，仅供观察。`;
+    $("csNote").classList.add("on");
+  }else{
+
+    $("csNote").textContent = "";
+    $("csNote").classList.remove("on");
+  }
+
+  $("csCharts").innerHTML = TOPICS.map((t,i)=>
+    `<div class="chart reveal" id="cs-chart-${t}" style="animation-delay:${i*50}ms">
+      <div class="chart-head">
+        <div class="chart-title">${t}</div>
+        <div class="legend"><span class="lg-static"><i class="swatch total"></i>反馈占比</span></div>
+      </div>
+      <div class="plot" data-cs="${t}">${csChartSVG(csKeptRows(t), t)}</div>
+    </div>`).join("");
+
+  bindCsPlots();
+}
+
+function bindCsPlots(){
+  const tip = $("tip");
+  const hide = ()=>{ tip.classList.remove("on"); tip.setAttribute("aria-hidden","true"); };
+
+  document.querySelectorAll("#csCharts .plot").forEach(plot=>{
+    const t = plot.dataset.cs;
+    const svg = plot.querySelector("svg");
+    if(!svg) return;
+    const cross = svg.querySelector(".cross");
+    const hit = svg.querySelector(".hit");
+    const dots = [...svg.querySelectorAll(".dot")];
+    const rows = csKeptRows(t);   // 与图表同源：只取当前周期窗口命中的批次
+    if(!rows.length) return;
+
+    const pW = GEO_W - GEO_L - GEO_R;
+    let idx = -1;
+
+    const toUserX = clientX => {
+      const ctm = svg.getScreenCTM && svg.getScreenCTM();
+      if(ctm && typeof DOMPoint === "function"){
+        try{ return new DOMPoint(clientX, 0).matrixTransform(ctm.inverse()).x; }catch(e){}
+      }
+      const box = svg.getBoundingClientRect();
+      return (clientX - box.left) / box.width * GEO_W;
+    };
+
+    const show = clientX=>{
+      const box = svg.getBoundingClientRect();
+      const ux = toUserX(clientX);
+      idx = Math.round(clamp((ux - GEO_L) / pW, 0, 1) * (rows.length - 1));
+      const cx = GEO_L + (rows.length===1 ? pW/2 : idx*pW/(rows.length-1));
+      cross.setAttribute("x1", cx); cross.setAttribute("x2", cx);
+      cross.classList.add("on");
+      dots.forEach(d=>d.classList.toggle("on", Number(d.dataset.i)===idx));
+
+      const r = rows[idx];
+      tip.innerHTML =
+        `<div class="t-h">${esc(t)}　${esc(r.label)}${r.short?`<span style="color:oklch(80% .08 80)">（不足 5 天）</span>`:""}</div>` +
+        `<div class="t-r"><span>全量客服会话</span><b>${num(r.total)}</b></div>` +
+        `<div class="t-r"><span>模块反馈量</span><b>${num(r.rel)}</b></div>` +
+        `<div class="t-r"><span>反馈占比</span><b>${pct(r.rate)}</b></div>` +
+        `<div class="t-hint">点击可定位到该批次的客服明细</div>`;
+      tip.classList.add("on");
+      tip.setAttribute("aria-hidden","false");
+
+      const pad = 12, tw = tip.offsetWidth, th = tip.offsetHeight;
+      let x = clientX + pad, y = box.top + box.height * 0.16;
+      if(x + tw > innerWidth - 8) x = clientX - tw - pad;
+      if(y + th > innerHeight - 8) y = innerHeight - th - 8;
+      tip.style.left = Math.max(8, x) + "px";
+      tip.style.top  = Math.max(8, y) + "px";
+    };
+
+    hit.addEventListener("pointermove", e=>show(e.clientX));
+    hit.addEventListener("pointerdown", e=>show(e.clientX));
+    svg.addEventListener("pointerleave", hide);
+    hit.addEventListener("click", ()=>{
+      if(idx < 0) return;
+      const p = rows[idx];        // 行自带 start/end，直接用（不再回查全量批次表）
+      csModule = t;
+      csStart = p.start;
+      csEnd = p.end;
+      fillCsControls(); csSyncRange(); renderCsDetails();
+      hide();
+
+      const csAudit = $("csBody").closest(".audit");
+      expandSection(csAudit);
+      csAudit.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+function fillCsControls(){
+
+  $("csModule").innerHTML = ["全部"].concat(TOPICS)
+    .map(t=>`<option ${t===csModule?"selected":""}>${t}</option>`).join("");
+}
+
+function csRows(){
+  const q = $("csSearch").value.trim().toLowerCase();
+  const sf = $("csSolvedFilter").value;
+  const mi = TOPICS.indexOf(csModule);
+  return DETAILS_CS.filter(r=>{
+    const p = D.cs.periods[r.p];
+    if(!p || p.end < csStart || p.start > csEnd) return false;
+    if(mi >= 0 && r.t.indexOf(mi) < 0) return false;
+    if(sf !== "all" && (sf === "solved") !== solved.has(r.id)) return false;
+    if(q && r.x.toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+}
+
+function renderCsDetails(){
+
+  if(!window.__DETAILS_CS__){ loadCsDetails(); return; }
+
+  const rows = csRows();
+  const solvedN = rows.filter(r=>solved.has(r.id)).length;
+  $("csCount").textContent = rows.length
+    ? `${num(rows.length)} 条 · 已解决 ${num(solvedN)} 条 · 展示前 ${num(Math.min(rows.length, CS_PAGE))} 条`
+    : "无匹配结果";
+
+  $("csState").style.display = "none";
+  $("csBody").innerHTML = rows.slice(0, CS_PAGE).map(r=>{
+    const on = solved.has(r.id);
+    const badges = r.t.length
+      ? r.t.map(k=>`<span class="badge">${esc(TOPICS[k])}</span>`).join("")
+      : `<span class="badge none">未命中</span>`;
+    return `<tr>
+      <td class="num" data-l="ID">${esc(r.id)}</td>
+      <td class="num" data-l="周期">${esc(csPeriodLabel(r.p))}</td>
+      <td data-l="模块">${badges}</td>
+      <td class="comment" data-l="用户反馈原文">${esc(r.x)}</td>
+      <td data-l="是否解决">
+        <label class="chk ${on?"on":""}">
+          <input type="checkbox" data-id="${esc(r.id)}" ${on?"checked":""}>
+          <span>${on?"已解决":"待处理"}</span>
+        </label>
+      </td>
+    </tr>`;
+  }).join("");
+
+  if(!rows.length){
+    $("csBody").innerHTML = `<tr><td colspan="5"><div class="empty">当前筛选条件下没有客服会话</div></td></tr>`;
+  }
+}
+
+function bindCsSolved(){
+  $("csBody").addEventListener("change", e=>{
+    const cb = e.target.closest('input[type="checkbox"]');
+    if(!cb) return;
+    const id = String(cb.dataset.id);
+    if(cb.checked) solved.add(id); else solved.delete(id);
+    saveSolved();
+    const label = cb.closest(".chk");
+    label.classList.toggle("on", cb.checked);
+    label.querySelector("span").textContent = cb.checked ? "已解决" : "待处理";
+    const total = csRows().filter(r=>solved.has(r.id)).length;
+    $("csCount").textContent = $("csCount").textContent
+      .replace(/已解决 [\d,]+ 条/, "已解决 " + num(total) + " 条");
+  });
+}
+
+function exportCsCsv(){
+  if(csLoadState !== "ready"){
+    loadCsDetails();
+    alert("客服明细仍在加载中，请稍候片刻再导出。");
+    return;
+  }
+  const rows = csRows();
+  if(!rows.length){ alert("当前筛选结果为空，无需导出。"); return; }
+  const head = ["ID","周期","模块","用户反馈原文","是否解决"];
+  const cell = v => `"${String(v).replace(/"/g,'""')}"`;
+  const lines = [head.map(cell).join(",")];
+  rows.forEach(r=>{
+    lines.push([r.id, csPeriodLabel(r.p), r.t.map(k=>TOPICS[k]).join("/") || "未命中",
+                r.x, (solved.has(r.id)?"是":"否")].map(cell).join(","));
+  });
+  const blob = new Blob(["\uFEFF" + lines.join("\r\n")], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `客服分析_${csModule}_${csStart}_${csEnd}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+}
+
+function init(){
+  initCollapse();   // 先收起，再渲染内容（内容渲染到隐藏容器里没有副作用）
+
+  renderStar();
+  renderBaseline();
+  renderSwitches();
+  renderCards();
+  renderCharts();
+
+  fillFilterControls();
+  syncRange();
+
+  $("rangeTrigger").onclick = e=>{
+    e.stopPropagation();
+    csClosePanel();
+    const open = $("rangePanel").classList.toggle("open");
+    $("rangeTrigger").setAttribute("aria-expanded", open ? "true" : "false");
+  };
+  $("rangeCancel").onclick = closePanel;
+  $("rangeApply").onclick = applyRange;
+  document.querySelectorAll("#rangePanel .quick button").forEach(b=>{
+    b.onclick = ()=>{ setQuick(b.dataset.range); };
+  });
+  document.addEventListener("click", e=>{
+    if(!e.target.closest(".field")){ closePanel(); csClosePanel(); }
+  });
+
+  $("detailPlatform").onchange = e=>{ fPlatform = e.target.value; fillFilterControls(); renderDetails(); };
+  $("detailTopic").onchange    = e=>{ fTopic = e.target.value; renderDetails(); };
+  $("solvedFilter").onchange   = renderDetails;
+  $("onlyNeg").onchange        = e=>{ onlyNeg = e.target.checked; renderDetails(); };
+  $("exportBtn").onclick       = exportCSV;
+  bindSolved();
+
+  let timer = null;
+  $("detailSearch").oninput = ()=>{
+    clearTimeout(timer);
+    timer = setTimeout(renderDetails, 160);
+  };
+
+  if(!DETAILS.length){
+    $("detailState").innerHTML = "未能加载评论明细数据（assets/details.js）。请确认该文件与 report.html 位于同一目录下。";
+  }else{
+    renderDetails();
+  }
+
+  renderCsBaseline();
+  renderCsCards();
+  renderCsCharts();
+  refreshCsHint();
+  fillCsControls();
+  csSyncRange();
+
+  $("csRangeTrigger").onclick = e=>{
+    e.stopPropagation();
+    closePanel();
+    const open = $("csRangePanel").classList.toggle("open");
+    $("csRangeTrigger").setAttribute("aria-expanded", open ? "true" : "false");
+  };
+  $("csRangeCancel").onclick = csClosePanel;
+  $("csRangeApply").onclick = csApplyRange;
+  document.querySelectorAll("#csRangePanel .quick button").forEach(b=>{
+    b.onclick = ()=>{ csSetQuick(b.dataset.csRange); };
+  });
+
+  $("csModule").onchange = e=>{ csModule = e.target.value; renderCsDetails(); };
+  $("csSolvedFilter").onchange = renderCsDetails;
+  $("csExportBtn").onclick = ()=>{ loadCsDetails(); exportCsCsv(); };
+  bindCsSolved();
+
+  let csTimer = null;
+  $("csSearch").oninput = ()=>{
+    clearTimeout(csTimer);
+    csTimer = setTimeout(renderCsDetails, 160);
+  };
+
+  if("IntersectionObserver" in window){
+    const io = new IntersectionObserver(es=>{
+      if(es.some(e=>e.isIntersecting)){ loadCsDetails(); io.disconnect(); }
+    }, {rootMargin: "600px 0px"});
+    io.observe($("csBaseline"));
+  }else{
+
+    setTimeout(loadCsDetails, 1500);
+  }
+
+}
+init();
+</script>
+</body>
+</html>

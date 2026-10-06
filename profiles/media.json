@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "id": "media-legacy",
+  "topics": [
+    {
+      "key": "playback",
+      "name": "播放",
+      "matcher": "builtin",
+      "builtin": "播放",
+      "order": 0,
+      "enabled": true
+    },
+    {
+      "key": "risk_control",
+      "name": "风控",
+      "matcher": "builtin",
+      "builtin": "风控",
+      "order": 1,
+      "enabled": true
+    },
+    {
+      "key": "advertising",
+      "name": "广告",
+      "matcher": "builtin",
+      "builtin": "广告",
+      "order": 2,
+      "enabled": true
+    },
+    {
+      "key": "download",
+      "name": "下载",
+      "matcher": "builtin",
+      "builtin": "下载",
+      "order": 3,
+      "enabled": true
+    },
+    {
+      "key": "web_search",
+      "name": "网页浏览与搜索",
+      "matcher": "builtin",
+      "builtin": "网页浏览与搜索",
+      "order": 4,
+      "enabled": true
+    }
+  ]
+}

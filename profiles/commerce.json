@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "id": "commerce-example",
+  "topics": [
+    {
+      "key": "payment",
+      "name": "支付",
+      "keywords": [
+        "支付",
+        "扣款"
+      ],
+      "requires": [
+        "订单"
+      ],
+      "excludes": [
+        "演示"
+      ],
+      "order": 0
+    },
+    {
+      "key": "logistics",
+      "name": "物流",
+      "keywords": [
+        "物流",
+        "快递"
+      ],
+      "order": 1
+    },
+    {
+      "key": "performance",
+      "name": "性能",
+      "keywords": [
+        "卡顿",
+        "流畅"
+      ],
+      "order": 2
+    },
+    {
+      "key": "account",
+      "name": "账号",
+      "keywords": [
+        "登录"
+      ],
+      "enabled": false,
+      "order": 3
+    }
+  ]
+}
