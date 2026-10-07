@@ -3,6 +3,7 @@
 LICENSE
 README.md
 docs/PUBLIC_SCOPE.md
+docs/USAGE.md
 docs/dashboard.png
 docs/demo/assets/details.js
 docs/demo/assets/details_cs.js
