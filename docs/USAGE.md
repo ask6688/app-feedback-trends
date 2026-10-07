@@ -124,4 +124,3 @@ scripts/{metrics_meta,cs_metrics,star_metrics,audit_raw,raw_records}.json
 ```
 
 真正给人看的成果是 `report.html`。复制或分享报告时需带上 `assets/`。看板的“已解决”标记只保存在当前浏览器 localStorage，按 dataset 隔离；没有多人同步或写回分析库。
-
