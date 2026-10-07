@@ -165,3 +165,11 @@ python -B scripts/check_public.py
 - 输入文件由用户准备，报告在本地生成；项目不负责数据抓取或网站自动发布。
 
 [Agent Skill](skills/app-feedback-trends/SKILL.md) 是可选入口，普通用户按上述 CLI 即可运行。
+
+## 备注：与 App User Voice 的关系
+
+本项目与 [app-user-voice](https://github.com/ask6688/app-user-voice) 保持独立，协作范围如下：
+
+- **共同维护**：概念命名、部分同义表达和回归案例；各仓库保存自己的版本化快照，运行时不依赖对方。快照维护方式见 [周报项目使用指南](https://github.com/ask6688/app-user-voice/blob/main/docs/USAGE.md#语义快照维护)。
+- **分别判断**：本项目监测预定义 Topic 的长期变化；User Voice 发现本周期的具体问题和建议。分类、去重和报告规则分别维护；“视频播放很流畅”可进入本项目的播放主题，但不进入 User Voice `media` 模式的问题分析。
+- **指标不同**：本项目的相关差评占比以同期全量市场评论为分母；User Voice 的问题差评占比以本期商店差评为分母。同步词义和案例不代表统一分析口径。
